@@ -1,0 +1,27 @@
+vendor: eltex
+# Removing "interface <NAME>" where the name contains a space must keep the
+# whole name. A single-word "*" capture produced "no interface gigabitethernet"
+# without the port number.
+before: |
+  hostname esr-1
+  mpls
+  mpls ldp
+    router-id 10.0.0.1
+    interface gigabitethernet 1/0/1
+    interface gigabitethernet 1/0/2
+
+after: |
+  hostname esr-1
+  mpls
+  mpls ldp
+    router-id 10.0.0.1
+    interface gigabitethernet 1/0/1
+
+patch: |
+  configure
+  mpls ldp
+    no interface gigabitethernet 1/0/2
+    exit
+  do commit
+  save
+  exit

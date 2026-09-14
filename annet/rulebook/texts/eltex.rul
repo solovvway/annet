@@ -78,7 +78,7 @@ ip name-server *
 # ==== LLDP ================================================================
 
 lldp run
-lldp * interface *
+lldp ~ interface ~
 lldp management-address
 
 # ==== L2: VLAN / bridge ===================================================
@@ -206,9 +206,9 @@ router ospf *
     log-adjacency-changes
 
 router ospfv3 *
-    router-id
+    router-id ~
     area *
-    interface *
+    interface ~
     redistribute ~
 
 # ==== BGP =================================================================
@@ -267,8 +267,8 @@ ip community-list * deny ~
 
 mpls
 mpls ldp
-    router-id
-    interface *
+    router-id ~
+    interface ~
 
 mpls l2vpn
     vpls *

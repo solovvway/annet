@@ -164,10 +164,10 @@ interface */([a-z]+ethernet\s+[0-9\/\.]+)/  %logic=annet.rulebook.common.permane
 
 # ==== Static routing ======================================================
 
-ip route ~                              %ignore_case
-ipv6 route ~                            %ignore_case
-ip route vrf * ~                        %ignore_case
-ipv6 route vrf * ~                      %ignore_case
+ip route ~
+ipv6 route ~
+ip route vrf * ~
+ipv6 route vrf * ~
 
 # ==== VRF =================================================================
 

@@ -1,0 +1,27 @@
+vendor: eltex
+# Regression: removing service interfaces must keep their identifier.
+# A greedy "interface *" rule used to produce "no interface bridge" /
+# "no interface vpls" without the id.
+before: |
+  hostname esr-1
+  interface loopback 5
+    ip address 10.5.5.5 /32
+  interface bridge 100
+    description old-bridge
+  interface vpls oldvpls
+    description to-be-removed
+  vlan 100
+    name old
+
+after: |
+  hostname esr-1
+
+patch: |
+  configure
+  no interface loopback 5
+  no interface bridge 100
+  no interface vpls oldvpls
+  no vlan 100
+  do commit
+  save
+  exit

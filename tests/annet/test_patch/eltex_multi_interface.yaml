@@ -1,0 +1,33 @@
+vendor: eltex
+# Regression: two physical ports changing in the same run must each get their
+# own patch node.  A wildcard interface rule without a capturing group used to
+# collapse them into a single node and trip "Too many affected actions".
+before: |
+  hostname esr-1
+  interface gigabitethernet 1/0/1
+    description OLD
+  interface gigabitethernet 1/0/7
+    ip address 15.0.128.50 /30
+
+after: |
+  hostname esr-1
+  interface gigabitethernet 1/0/1
+    description NEW
+  interface gigabitethernet 1/0/7
+    description added
+    ip address 15.0.128.50 /30
+    shutdown
+
+patch: |
+  configure
+  interface gigabitethernet 1/0/1
+    no description OLD
+    description NEW
+    exit
+  interface gigabitethernet 1/0/7
+    description added
+    shutdown
+    exit
+  do commit
+  save
+  exit

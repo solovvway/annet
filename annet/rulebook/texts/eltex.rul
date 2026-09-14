@@ -87,8 +87,9 @@ bridge *
 # ==== Interfaces ==========================================================
 
 # Sub-interfaces, loopbacks, VLAN (SVI) and aggregate (port-channel / bond)
-# interfaces carry L3 configuration, exactly as on IOS.
-interface ?/(loopback|tunnel|vlan|bond|port-channel)\s+\d+$/
+# interfaces carry L3 configuration, exactly as on IOS.  Each interface name is
+# captured into a group so every interface gets its own patch node.
+interface */((?:loopback|tunnel|vlan|bond|port-channel)\s+\d+)/
     description ~
     ip address ~                        %diff_logic=annet.rulebook.cisco.iface.diff
     ip address dhcp
@@ -102,9 +103,44 @@ interface ?/(loopback|tunnel|vlan|bond|port-channel)\s+\d+$/
     ipv6 mtu *
     bridge-group *
     ip unnumbered *
+    vrrp *
+        ip *
+        priority *
+        preempt
+        no preempt
+        authentication *
+        track *
+        timers *
+        description ~
 
-# Physical Ethernet ports: last, so the L3 rules above match first.
-interface ?/[a-z]+ethernet\s+[0-9\/\.]+$/  %logic=annet.rulebook.common.permanent %diff_logic=annet.rulebook.cisco.iface.diff
+interface */([a-z]+ethernet\s+[0-9\/]+\.[0-9]+)/
+    description ~
+    ip address ~                        %diff_logic=annet.rulebook.cisco.iface.diff
+    ip address dhcp
+    ipv6 address ~                      %diff_logic=annet.rulebook.cisco.iface.diff
+    ipv6 enable
+    ip vrf forwarding                   %diff_logic=annet.rulebook.cisco.iface.diff
+    mtu *
+    shutdown
+    no shutdown
+    ip mtu *
+    ipv6 mtu *
+    bridge-group *
+    vlan id *
+    encapsulation *
+
+# Bridge and VPLS service interfaces (L2 service endpoints on ESR routers).
+interface */(bridge\s+\d+)/
+    description ~
+    bridge-group *
+
+interface */(vpls\s+\S+)/
+    description ~
+
+# Physical Ethernet ports: last, so the L3 rules above match first.  The whole
+# interface name is captured into a group so every port gets its own patch node
+# (otherwise all ports collapse into one node and the diff cannot be emitted).
+interface */([a-z]+ethernet\s+[0-9\/\.]+)/  %logic=annet.rulebook.common.permanent %diff_logic=annet.rulebook.cisco.iface.diff
     description ~
     switchport mode
     switchport access vlan
@@ -208,16 +244,7 @@ ip community-list * permit ~
 ip community-list * deny ~
 
 # ==== VRRP ================================================================
-
-interface *
-    vrrp *
-        ip *
-        priority *
-        preempt
-        no preempt
-        authentication *
-        track *
-        timers *
+# (vrrp blocks live inside the interface blocks below)
 
 # ==== MPLS / VPLS =========================================================
 

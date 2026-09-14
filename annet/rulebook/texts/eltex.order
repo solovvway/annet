@@ -72,6 +72,9 @@ interface */\S+\.\d+/
 interface *
 
 # ---- removals that must run after the referring blocks -------------------
+# A VRF can only be deleted once no interface references it via
+# "ip vrf forwarding", so its removal goes after the interface blocks.
+no ip vrf %order_reverse
 no vlan %order_reverse
 no bridge %order_reverse
 

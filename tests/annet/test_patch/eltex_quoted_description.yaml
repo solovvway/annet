@@ -1,0 +1,24 @@
+vendor: eltex
+# Descriptions are quoted because Eltex requires quoting for strings with
+# spaces.  Quotes are part of the captured value and must round-trip.
+before: |
+  hostname esr-1
+  interface gigabitethernet 1/0/1
+    description "Old desc"
+    ip address 10.0.0.1 /30
+
+after: |
+  hostname esr-1
+  interface gigabitethernet 1/0/1
+    description "New desc with spaces"
+    ip address 10.0.0.1 /30
+
+patch: |
+  configure
+  interface gigabitethernet 1/0/1
+    no description "Old desc"
+    description "New desc with spaces"
+    exit
+  do commit
+  save
+  exit

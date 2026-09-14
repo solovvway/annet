@@ -1,0 +1,18 @@
+vendor: eltex
+# Regression: sub-interfaces are removable (they must not inherit the
+# "permanent" logic used for physical ports).
+before: |
+  hostname esr-1
+  interface gigabitethernet 1/0/1.100
+    description old-sub
+    ip address 10.100.0.1 /24
+
+after: |
+  hostname esr-1
+
+patch: |
+  configure
+  no interface gigabitethernet 1/0/1.100
+  do commit
+  save
+  exit

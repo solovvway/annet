@@ -63,9 +63,12 @@ no username ~
 no snmp-server community ~
     dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
 
-# Generic safety net: answer "y" to any y/N confirmation that has no explicit rule.
-/[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
-/[Dd]o you really/i ::: y
-/[Aa]re you sure/i ::: y
+# Generic safety net: answer "y" to any y/N confirmation that has no explicit
+# rule.  A trailing wildcard rule carries these dialogs for every command.
+~ %timeout=120
+    dialog: /continue\?.?\[y\/n\]/ ::: y
+    dialog: /do you really/i ::: y
+    dialog: /are you sure/i ::: y
+    dialog: /proceed with reload/i ::: y
 
 # vim: set syntax=annrulebook:

@@ -1,0 +1,29 @@
+vendor: eltex
+# Regression: a VRF must be detached from its interfaces before it is removed,
+# i.e. "no ip vrf" comes after the interface blocks.
+before: |
+  hostname esr-1
+  vlan 100
+    name old
+  ip vrf OLD
+    description old
+  interface vlan 5
+    ip vrf forwarding OLD
+    ip address 10.5.0.1 /24
+
+after: |
+  hostname esr-1
+  interface vlan 5
+    ip address 10.5.0.1 /24
+
+patch: |
+  configure
+  interface vlan 5
+    no ip vrf forwarding
+    ip address 10.5.0.1 /24
+    exit
+  no ip vrf OLD
+  no vlan 100
+  do commit
+  save
+  exit

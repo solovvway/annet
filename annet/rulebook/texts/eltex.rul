@@ -243,7 +243,14 @@ router bgp *
 
 # ==== Route maps / prefix lists / community lists =========================
 
-route-map *
+# Each sequence is a separate block; the sequence number must be part of the
+# key, otherwise "route-map RM permit 10" and "route-map RM deny 30" collapse
+# into one block and additions are lost.
+route-map * permit *
+    description ~
+    match ~
+    set ~
+route-map * deny *
     description ~
     match ~
     set ~

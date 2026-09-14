@@ -1,0 +1,26 @@
+vendor: eltex
+# Each route-map sequence is a separate block: adding "deny 30" next to an
+# existing "permit 10" must be detected. A rule without the sequence in its key
+# collapsed all sequences into one block and dropped the addition.
+before: |
+  hostname esr-1
+  route-map RM permit 10
+    match ip address prefix-list PL
+    set metric 100
+
+after: |
+  hostname esr-1
+  route-map RM permit 10
+    match ip address prefix-list PL
+    set metric 100
+  route-map RM deny 30
+    match community CL2
+
+patch: |
+  configure
+  route-map RM deny 30
+    match community CL2
+    exit
+  do commit
+  save
+  exit

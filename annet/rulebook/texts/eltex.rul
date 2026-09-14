@@ -26,10 +26,20 @@ clock timezone
 clock summer-time
 
 # ==== Users / AAA ========================================================
-
+# username is a block: "username <NAME>" enters CONFIG-USER mode, and the
+# password/privilege are configured inside it.  The one-line forms appear in
+# some firmware; either way the removal must be "no username <NAME>", never
+# "no username <NAME> password ...".
 username * password
-username * privilege
 username * encrypted password
+username * privilege *
+username *
+    password ~
+    privilege *
+    role *
+    shell *
+    login *
+
 aaa authentication login
 aaa authentication enable
 aaa authorization

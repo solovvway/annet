@@ -1,0 +1,17 @@
+vendor: eltex
+# A password change must overwrite the user, never emit "no username ..." first:
+# an incorrect removal could lock the operator out if the re-add fails.
+before: |
+  hostname esr-1
+  username admin password 5 oldhash privilege 15
+
+after: |
+  hostname esr-1
+  username admin password 5 newhash privilege 15
+
+patch: |
+  configure
+  username admin password 5 newhash privilege 15
+  do commit
+  save
+  exit

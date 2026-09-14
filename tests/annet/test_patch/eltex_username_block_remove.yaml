@@ -1,0 +1,17 @@
+vendor: eltex
+# A user configured in block form is removed by name only.
+before: |
+  hostname esr-1
+  username operator
+    password encrypted abc123
+    privilege 1
+
+after: |
+  hostname esr-1
+
+patch: |
+  configure
+  no username operator
+  do commit
+  save
+  exit

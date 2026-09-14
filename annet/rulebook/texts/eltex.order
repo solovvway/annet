@@ -1,0 +1,78 @@
+# Ordering rulebook for Eltex ESR/MES.
+#
+# Defines the order in which generated commands are sent to the device.
+# Commands that do not appear here keep their natural order.
+# %order_reverse marks a "no ..." removal and places it among the direct ones.
+
+# ---- system identity and time -------------------------------------------
+hostname *
+ip domain-name *
+ip name-server *
+clock ~
+
+# ---- features that later blocks depend on --------------------------------
+ip routing
+ipv6 unicast-routing
+ip multicast-routing
+
+# ---- VRF is referenced from interfaces and routing processes -------------
+ip vrf
+
+# ---- users / AAA / management --------------------------------------------
+username
+aaa
+radius
+radius-server
+tacacs-server
+enable
+
+ip ssh server
+ip ssh version
+ip telnet server
+
+# ---- monitoring ----------------------------------------------------------
+logging
+snmp-server view
+snmp-server group
+snmp-server user
+snmp-server community
+snmp-server host
+snmp-server enable traps
+snmp-server location
+snmp-server contact
+snmp-server trap-source
+snmp-server source-interface
+ntp server
+ntp source-interface
+lldp run
+
+# ---- L2 comes before L3 --------------------------------------------------
+vlan
+bridge
+
+# ---- routing protocols before the interfaces that reference them ---------
+route-map
+ip prefix-list
+ip community-list
+
+router ospf
+    router-id
+    area
+    network
+router ospfv3
+
+router bgp
+    router-id
+    neighbor */[\da-f\.\:]+/ remote-as
+    neighbor */[\da-f\.\:]+/ update-source
+    address-family
+
+# ---- interfaces last, sub-interfaces after their parents -----------------
+interface */\S+\.\d+/
+interface *
+
+# ---- removals that must run after the referring blocks -------------------
+no vlan %order_reverse
+no bridge %order_reverse
+
+# vim: set syntax=annrulebook:

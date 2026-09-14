@@ -27,6 +27,9 @@ List of supported Network Operation Systems:
 +----------+---------------------------+------------------------------------------------------------------------------+
 | FRR      | /etc/frr/frr.conf         | Yes                                                                          |
 +----------+---------------------------+------------------------------------------------------------------------------+
+| Eltex    | ESR (service routers),    | No                                                                           |
+|          | MES (switches)            |                                                                              |
++----------+---------------------------+------------------------------------------------------------------------------+
 
 It works this way. Annet **gen**\ erates configuration for a device by running Python code,
 which usually goes to the Network Source of Truth, like NetBox. Annet then gets the **diff**\ erence
@@ -64,6 +67,7 @@ Usage help can be obtained by calling ``annet -h`` or for a specific command, su
    :caption: Extending:
 
    usage/adapters.rst
+   usage/vendors/eltex.rst
    mesh/index.rst
    rpl/index.rst
 

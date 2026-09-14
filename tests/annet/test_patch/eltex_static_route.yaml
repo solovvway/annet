@@ -1,0 +1,18 @@
+vendor: eltex
+before: |
+  hostname esr-1
+  ip route 0.0.0.0 /0 10.0.0.254
+  ip route 10.1.0.0 /24 10.0.0.1
+
+after: |
+  hostname esr-1
+  ip route 0.0.0.0 /0 10.0.0.254
+  ip route 10.1.0.0 /24 10.0.0.1
+  ip route 10.2.0.0 /24 10.0.0.2
+
+patch: |
+  configure
+  ip route 10.2.0.0 /24 10.0.0.2
+  do commit
+  save
+  exit

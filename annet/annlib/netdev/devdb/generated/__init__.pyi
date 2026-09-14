@@ -101,6 +101,20 @@ hw.Edgecore
 hw.Edgecore.AS
 hw.Edgecore.AS9736
 hw.Edgecore.AS9817
+hw.Eltex
+hw.Eltex.ESR
+hw.Eltex.ESR100
+hw.Eltex.ESR1000
+hw.Eltex.ESR1500
+hw.Eltex.ESR1511
+hw.Eltex.ESR200
+hw.Eltex.MES
+hw.Eltex.MES2300
+hw.Eltex.MES2400
+hw.Eltex.MES3300
+hw.Eltex.MES5300
+hw.Eltex.MES5500
+hw.Eltex.WEP
 hw.FSCOM
 hw.FSCOM.N
 hw.FSCOM.N9600
@@ -601,6 +615,68 @@ class Cisco_XR(HardwareLeaf):
     ...
 
 class Cisco_XRV(HardwareLeaf):
+    ...
+
+class Eltex(HardwareLeaf):
+    ESR: Eltex_ESR
+    ESR100: Eltex_ESR_ESR100
+    ESR1000: Eltex_ESR_ESR1000
+    ESR1500: Eltex_ESR_ESR1500
+    ESR1511: Eltex_ESR_ESR1511
+    ESR200: Eltex_ESR_ESR200
+    MES: Eltex_MES
+    MES2300: Eltex_MES_MES2300
+    MES2400: Eltex_MES_MES2400
+    MES3300: Eltex_MES_MES3300
+    MES5300: Eltex_MES_MES5300
+    MES5500: Eltex_MES_MES5500
+    WEP: Eltex_WEP
+
+class Eltex_ESR(HardwareLeaf):
+    ESR100: Eltex_ESR_ESR100
+    ESR1000: Eltex_ESR_ESR1000
+    ESR1500: Eltex_ESR_ESR1500
+    ESR1511: Eltex_ESR_ESR1511
+    ESR200: Eltex_ESR_ESR200
+
+class Eltex_ESR_ESR100(HardwareLeaf):
+    ...
+
+class Eltex_ESR_ESR1000(HardwareLeaf):
+    ...
+
+class Eltex_ESR_ESR1500(HardwareLeaf):
+    ...
+
+class Eltex_ESR_ESR1511(HardwareLeaf):
+    ...
+
+class Eltex_ESR_ESR200(HardwareLeaf):
+    ...
+
+class Eltex_MES(HardwareLeaf):
+    MES2300: Eltex_MES_MES2300
+    MES2400: Eltex_MES_MES2400
+    MES3300: Eltex_MES_MES3300
+    MES5300: Eltex_MES_MES5300
+    MES5500: Eltex_MES_MES5500
+
+class Eltex_MES_MES2300(HardwareLeaf):
+    ...
+
+class Eltex_MES_MES2400(HardwareLeaf):
+    ...
+
+class Eltex_MES_MES3300(HardwareLeaf):
+    ...
+
+class Eltex_MES_MES5300(HardwareLeaf):
+    ...
+
+class Eltex_MES_MES5500(HardwareLeaf):
+    ...
+
+class Eltex_WEP(HardwareLeaf):
     ...
 
 class H3C(HardwareLeaf):
@@ -1180,6 +1256,7 @@ class FakeHardwareView(HardwareLeaf):
     B4com: B4com
     Cisco: Cisco
     Edgecore: PC_Whitebox_Edgecore
+    Eltex: Eltex
     FSCOM: PC_Whitebox_FSCOM
     H3C: H3C
     Huawei: Huawei

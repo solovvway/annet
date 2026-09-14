@@ -6,6 +6,30 @@ from annet.annlib.netdev.views.hardware import HardwareView
 logger = getLogger(__name__)
 
 
+# Breeds that annet understands.  A NetBox platform slug equal to one of these
+# is treated as an explicit driver selection and takes precedence over the
+# manufacturer/model heuristic (see get_device_breed).
+KNOWN_BREEDS = frozenset(
+    {
+        "aruos",
+        "bcom-os",
+        "cuml2",
+        "eltex",
+        "eos4",
+        "h3c",
+        "ios12",
+        "ipn",
+        "jun10",
+        "moxa",
+        "nxos",
+        "pc",
+        "routeros",
+        "vrp55",
+        "vrp85",
+    }
+)
+
+
 def get_hw(manufacturer: str, model: str, platform_name: str) -> HardwareView:
     # By some reason Netbox calls Mellanox SN as MSN, so we fix them here
     if manufacturer == "Mellanox" and model.startswith("MSN"):
@@ -48,4 +72,6 @@ def get_breed(manufacturer: str, model: str) -> str:
         return "aruos"
     elif hw.Sitonica:
         return "ipn"
+    elif hw.Eltex:
+        return "eltex"
     return ""

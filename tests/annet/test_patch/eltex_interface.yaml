@@ -1,0 +1,34 @@
+vendor: eltex
+before: |
+  hostname esr-1
+  interface gigabitethernet 1/0/1
+    description old-uplink
+    switchport mode trunk
+    switchport trunk allowed vlan 10,20
+  interface vlan 10
+    ip address 10.0.10.1 /24
+
+after: |
+  hostname esr-1
+  interface gigabitethernet 1/0/1
+    description new-uplink
+    switchport mode trunk
+    switchport trunk allowed vlan 10,20,30
+  interface vlan 10
+    ip address 10.0.10.1 /24
+  interface vlan 30
+    ip address 10.0.30.1 /24
+
+patch: |
+  configure
+  interface vlan 30
+    ip address 10.0.30.1 /24
+    exit
+  interface gigabitethernet 1/0/1
+    no description old-uplink
+    description new-uplink
+    switchport trunk allowed vlan add 30
+    exit
+  do commit
+  save
+  exit

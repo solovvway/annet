@@ -1,0 +1,71 @@
+# Deploy rulebook for Eltex ESR/MES.
+#
+# Operators:
+#   *  One argument
+#   ~  One or more arguments
+#
+# Parameters:
+#   %timeout=...  Command execution timeout (in seconds, 30 by default)
+#
+# Answers to questions
+#
+# <command>
+#   dialog: <question> ::: <answer> <parameters>
+#
+# If <question> is enclosed in slashes (//), it is treated as a regexp, otherwise as an exact match.
+# Parameters:
+#   %send_nl=...  Whether to send a newline after the answer (bool, true by default)
+# -----
+
+# The commit/confirm transaction is applied by the vendor `apply` hook, not here.
+
+save %timeout=60
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+    dialog: /[Oo]verwrite\? ?\[[Yy]\/[Nn]\]/ ::: y
+
+copy running-config startup-config
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+
+reload %timeout=60
+    dialog: /Do you really want to reload/i ::: y
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+    dialog: /Proceed with reload/i ::: y
+
+# Deleting an OSPF/BGP process or a whole VRF is confirmed interactively.
+no router ospf ~
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+no router bgp ~
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+    dialog: /will be deleted/i ::: y
+no ip vrf ~
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+    dialog: /will be deleted/i ::: y
+no interface ~
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+
+# VLAN / bridge teardown resets member ports.
+no vlan ~
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+no bridge ~
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+
+# VPLS / L2VPN instance removal.
+no mpls l2vpn vpls ~
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+no vpls %
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+
+# Local user removal may log the account out.
+no username ~
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+
+# SNMP community/user removal.
+no snmp-server community ~
+    dialog: /[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+
+# Generic safety net: answer "y" to any y/N confirmation that has no explicit rule.
+/[Cc]ontinue\? ?\[[Yy]\/[Nn]\]/ ::: y
+/[Dd]o you really/i ::: y
+/[Aa]re you sure/i ::: y
+
+# vim: set syntax=annrulebook:

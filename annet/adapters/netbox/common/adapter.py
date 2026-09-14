@@ -3,7 +3,7 @@ from typing import Any, Generic, TypeVar
 
 from annet.annlib.netdev.views.hardware import HardwareView
 
-from .manufacturer import get_breed, get_hw
+from .manufacturer import KNOWN_BREEDS, get_breed, get_hw
 from .models import FHRPGroup, FHRPGroupAssignment, Interface, IpAddress, NetboxDevice, Prefix
 
 
@@ -19,6 +19,15 @@ FHRPGroupAssignmentT = TypeVar(
 
 
 def get_device_breed(device: NetboxDeviceT) -> str:
+    # An explicit platform slug always wins: it is the field NetBox operators
+    # use to pin the annet/Napalm driver, and it lets a single manufacturer
+    # (e.g. Eltex, which ships both ESR routers and MES switches) expose more
+    # than one breed.
+    if platform := getattr(device, "platform", None):
+        if slug := getattr(platform, "slug", None):
+            known = KNOWN_BREEDS
+            if slug in known:
+                return slug
     if device.device_type and device.device_type.manufacturer:
         return get_breed(
             device.device_type.manufacturer.name,

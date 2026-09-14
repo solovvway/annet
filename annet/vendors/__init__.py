@@ -8,6 +8,7 @@ from .library import (
     asterfusioncli,
     b4com,
     cisco,
+    eltex,
     h3c,
     huawei,
     iosxr,

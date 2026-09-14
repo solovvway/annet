@@ -231,5 +231,20 @@
     "Sitonica.SW9850": "[Ss][Ww]9850",
 
     "AsterfusionCLI": "^[Aa]sterfusion CX206",
-    "AsterfusionCLI.CX206Y": " CX206Y"
+    "AsterfusionCLI.CX206Y": " CX206Y",
+
+    "Eltex": "^[Ee]ltex",
+    "Eltex.ESR": "\\bESR",
+    "Eltex.ESR?.ESR100": "ESR-?10[0-9]\\b",
+    "Eltex.ESR?.ESR200": "ESR-?20[0-9]\\b",
+    "Eltex.ESR?.ESR1000": "ESR-?10[0-9]{2}\\b",
+    "Eltex.ESR?.ESR1500": "ESR-?15(?!11)[0-9]{2}\\b",
+    "Eltex.ESR?.ESR1511": "ESR-?1511\\b",
+    "Eltex.MES": "\\bMES",
+    "Eltex.MES?.MES2300": "MES-?23\\d{2}",
+    "Eltex.MES?.MES2400": "MES-?24\\d{2}",
+    "Eltex.MES?.MES3300": "MES-?33\\d{2}",
+    "Eltex.MES?.MES5300": "MES-?53\\d{2}",
+    "Eltex.MES?.MES5500": "MES-?55\\d{2}",
+    "Eltex.WEP": "\\bWEP-?[23]"
 }

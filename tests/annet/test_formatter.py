@@ -493,6 +493,61 @@ def test_nexus_join(nexus_config):
     assert formatter.join(config) == nexus_config
 
 
+def eltex_config():
+    return """\
+hostname esr-1
+interface gigabitethernet 1/0/1
+  description uplink
+  switchport mode trunk
+  switchport trunk allowed vlan 10,20
+interface vlan 10
+  ip address 10.0.10.1 /24
+router ospf 1
+  router-id 10.0.0.1
+  network 10.0.10.0 /24 area 0.0.0.0
+"""
+
+
+def test_eltex_join():
+    # The formatter must rebuild an Eltex running-config byte-for-byte and
+    # preserve the two-space block indentation used by ESR/MES.
+    config = eltex_config()
+    formatter = registry_connector.get().match(make_hw_stub("eltex")).make_formatter()
+    tree = parse_to_tree(config, formatter.split)
+    assert formatter.join(tree) == config.rstrip("\n")
+
+
+def test_eltex_split_drops_exit_markers():
+    # "exit" lines are block delimiters, not configuration; the parsed tree must
+    # not contain them.
+    text = """\
+hostname esr-1
+interface gigabitethernet 1/0/1
+  description uplink
+exit
+"""
+    formatter = registry_connector.get().match(make_hw_stub("eltex")).make_formatter()
+    tree = parse_to_tree(text, formatter.split)
+    assert "exit" not in list(tree.keys())
+    assert "interface gigabitethernet 1/0/1" in tree
+
+
+def test_eltex_vendor_apply_commit_and_finalize():
+    from annet.annlib.netdev.views.hardware import HardwareView
+
+    vendor = registry_connector.get().match(make_hw_stub("eltex"))
+    assert vendor.NAME == "eltex"
+    assert vendor.reverse == "no"
+    assert vendor.exit == "exit"
+
+    before, after = vendor.apply(HardwareView("Eltex ESR-1000"), do_commit=True, do_finalize=True, path=None)
+    assert [str(c) for c in before] == ["configure"]
+    assert [str(c) for c in after] == ["do commit", "save", "exit"]
+
+    before, after = vendor.apply(HardwareView("Eltex ESR-1000"), do_commit=False, do_finalize=False, path=None)
+    assert [str(c) for c in after] == ["exit"]
+
+
 def test_cisco_banner_split(cisco_banner_config):
     # Cisco uses the "^C" delimiter; the banner block must stay a single tree row
     # with significant whitespace in the body preserved.

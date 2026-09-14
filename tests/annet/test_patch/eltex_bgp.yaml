@@ -1,0 +1,27 @@
+vendor: eltex
+before: |
+  hostname esr-2
+  router bgp 65001
+    router-id 10.0.0.2
+    neighbor 10.0.0.1 remote-as 65002
+    neighbor 10.0.0.1 description peer-old
+
+after: |
+  hostname esr-2
+  router bgp 65001
+    router-id 10.0.0.2
+    neighbor 10.0.0.1 remote-as 65002
+    neighbor 10.0.0.1 description peer-new
+    neighbor 10.0.0.3 remote-as 65003
+
+patch: |
+  configure
+  router bgp 65001
+    neighbor 10.0.0.1 description peer-new
+      exit
+    neighbor 10.0.0.3 remote-as 65003
+      exit
+    exit
+  do commit
+  save
+  exit

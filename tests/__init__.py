@@ -62,6 +62,7 @@ def make_hw_stub(vendor):
             "snr": "SNR",
             "sitonica": "Sitonica",
             "asterfusioncli": "Asterfusion CX206Y",
+            "eltex": "Eltex ESR-1000",
         }[vendor],
         None,
     )

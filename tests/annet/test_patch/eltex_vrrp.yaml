@@ -1,0 +1,32 @@
+vendor: eltex
+before: |
+  hostname esr-1
+  interface vlan 10
+    ip address 10.0.10.1 /24
+    vrrp 10
+      ip 10.0.10.254
+      priority 100
+
+after: |
+  hostname esr-1
+  interface vlan 10
+    ip address 10.0.10.1 /24
+    vrrp 10
+      ip 10.0.10.254
+      priority 150
+      preempt
+      track 1
+
+patch: |
+  configure
+  interface vlan 10
+    vrrp 10
+      no priority 100
+      priority 150
+      preempt
+      track 1
+      exit
+    exit
+  do commit
+  save
+  exit

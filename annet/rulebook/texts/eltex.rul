@@ -1,0 +1,246 @@
+# Patching rulebook for Eltex ESR routers and MES switches.
+#
+# Eltex CLI is a hierarchical, IOS-like configuration tree: blocks are opened by
+# a plain row (e.g. "interface gigabitethernet 1/0/1") and closed with "exit",
+# and the negative form of a command is "no <command>".  Values matched with
+# "*" / "~" are reused to build the corresponding "no ..." command.
+#
+# Operators:
+#   *  One argument in undo
+#   ~  One or more arguments in undo
+#
+# Parameters:
+#   %global         The command applies at any level below
+#   %logic=...      Custom rule processing function
+#   %diff_logic=... Custom diff building function.
+#                   Works for sub-blocks, unlike %logic
+#   %comment=...    Adds a comment after the row; shown with the patch --add-comments option
+# -----
+
+# ==== Global / system =====================================================
+
+hostname *
+ip domain-name *
+ip domain-lookup
+clock timezone
+clock summer-time
+
+# ==== Users / AAA ========================================================
+
+username * password
+username * privilege
+username * encrypted password
+aaa authentication login
+aaa authentication enable
+aaa authorization
+aaa accounting
+tacacs-server *
+radius-server *
+enable password
+
+# ==== Management protocols ===============================================
+
+ip ssh server
+ip ssh version
+ip telnet server
+
+# ==== SNMP ===============================================================
+
+snmp-server community ~
+snmp-server host ~
+snmp-server view ~
+snmp-server group ~
+snmp-server user ~
+snmp-server enable traps
+snmp-server location
+snmp-server contact
+snmp-server trap-source
+snmp-server source-interface
+snmp-server engineid
+
+# ==== Logging / NTP / DNS =================================================
+
+logging *
+ntp server *
+ntp source-interface
+ip name-server *
+
+# ==== LLDP ================================================================
+
+lldp run
+lldp * interface *
+lldp management-address
+
+# ==== L2: VLAN / bridge ===================================================
+
+vlan *
+    name *
+    description *
+
+bridge *
+    description *
+    spanning-tree
+    no spanning-tree
+    enable
+    bridge-group *
+
+# ==== Interfaces ==========================================================
+
+# Sub-interfaces, loopbacks, VLAN (SVI) and aggregate (port-channel / bond)
+# interfaces carry L3 configuration, exactly as on IOS.
+interface ?/(loopback|tunnel|vlan|bond|port-channel)\s+\d+$/
+    description ~
+    ip address ~                        %diff_logic=annet.rulebook.cisco.iface.diff
+    ip address dhcp
+    ipv6 address ~                      %diff_logic=annet.rulebook.cisco.iface.diff
+    ipv6 enable
+    ip vrf forwarding                   %diff_logic=annet.rulebook.cisco.iface.diff
+    mtu *
+    shutdown
+    no shutdown
+    ip mtu *
+    ipv6 mtu *
+    bridge-group *
+    ip unnumbered *
+
+# Physical Ethernet ports: last, so the L3 rules above match first.
+interface ?/[a-z]+ethernet\s+[0-9\/\.]+$/  %logic=annet.rulebook.common.permanent %diff_logic=annet.rulebook.cisco.iface.diff
+    description ~
+    switchport mode
+    switchport access vlan
+    switchport trunk native vlan
+    switchport trunk allowed vlan       %logic=annet.rulebook.eltex.vlandb.swtrunk
+    ip address ~                        %diff_logic=annet.rulebook.cisco.iface.diff
+    ip address dhcp
+    ipv6 address ~                      %diff_logic=annet.rulebook.cisco.iface.diff
+    ipv6 enable
+    ip vrf forwarding                   %diff_logic=annet.rulebook.cisco.iface.diff
+    mtu *
+    ip mtu *
+    ipv6 mtu *
+    shutdown
+    no shutdown
+    channel-group
+    bridge-group *
+    storm-control *
+    spanning-tree portfast
+    lldp *
+
+# ==== Static routing ======================================================
+
+ip route ~                              %ignore_case
+ipv6 route ~                            %ignore_case
+ip route vrf * ~                        %ignore_case
+ipv6 route vrf * ~                      %ignore_case
+
+# ==== VRF =================================================================
+
+ip vrf *
+    description ~
+    rd *
+    route-target export *
+    route-target import *
+    ip route ~
+
+# ==== OSPF / OSPFv3 =======================================================
+
+router ospf *
+    router-id
+    area *
+        area-type
+        stub
+        description ~
+    network ~
+    default-metric *
+    passive-interface
+    max-metric router-lsa
+    redistribute ~
+    auto-cost reference-bandwidth
+    timers throttle spf
+    log-adjacency-changes
+
+router ospfv3 *
+    router-id
+    area *
+    interface *
+    redistribute ~
+
+# ==== BGP =================================================================
+
+router bgp *
+    router-id
+    address-family ~
+        network ~
+        redistribute ~
+        maximum-paths
+        aggregate-address ~
+    neighbor *
+        remote-as
+        description ~
+        update-source
+        ebgp-multihop *
+        next-hop-self
+        route-map ~
+        password
+        timers *
+        address-family ~
+            route-map ~
+            activate
+            next-hop-self
+        no shutdown
+    vrf *
+        rd *
+        route-target ~
+        neighbor *
+        address-family ~
+    bgp log-neighbor-changes
+
+# ==== Route maps / prefix lists / community lists =========================
+
+route-map *
+    description ~
+    match ~
+    set ~
+
+ip prefix-list * seq * permit ~
+ip prefix-list * seq * deny ~
+ip community-list * permit ~
+ip community-list * deny ~
+
+# ==== VRRP ================================================================
+
+interface *
+    vrrp *
+        ip *
+        priority *
+        preempt
+        no preempt
+        authentication *
+        track *
+        timers *
+
+# ==== MPLS / VPLS =========================================================
+
+mpls
+mpls ldp
+    router-id
+    interface *
+
+mpls l2vpn
+    vpls *
+        description ~
+        bridge-group *
+        vpn id *
+        ve id *
+        rd *
+        route-target export *
+        route-target import *
+        autodiscovery bgp
+
+# ==== Catch-all: everything else is a simple add/remove toggle ============
+
+description %global
+no ~ %global
+~ %global
+
+# vim: set syntax=annrulebook:

@@ -532,6 +532,38 @@ exit
     assert "interface gigabitethernet 1/0/1" in tree
 
 
+def test_eltex_address_family_uses_plain_exit():
+    # ESR closes address-family sub-modes with a plain "exit" (there is no
+    # "exit-address-family" on Eltex).  Two consecutive address-family blocks
+    # under one neighbor must stay siblings, not nest into each other, and the
+    # explicit "exit-address-family" from the base Cisco formatter must never be
+    # emitted.
+    text = """\
+router bgp 10417
+  neighbor 15.255.17.21
+    remote-as 10417
+    address-family l2vpn vpls
+      enable
+    exit
+    address-family vpnv4 unicast
+      enable
+    exit
+  exit
+"""
+    formatter = registry_connector.get().match(make_hw_stub("eltex")).make_formatter()
+    tree = parse_to_tree(text, formatter.split)
+    neighbor = tree["router bgp 10417"]["neighbor 15.255.17.21"]
+    assert list(neighbor.keys()) == [
+        "remote-as 10417",
+        "address-family l2vpn vpls",
+        "address-family vpnv4 unicast",
+    ]
+    assert "enable" in neighbor["address-family l2vpn vpls"]
+    # No Cisco-style terminator leaks into the rendered config.
+    rendered = formatter.join(tree)
+    assert "exit-address-family" not in rendered
+
+
 def test_eltex_vendor_apply_commit_and_finalize():
     from annet.annlib.netdev.views.hardware import HardwareView
 

@@ -274,12 +274,13 @@ mpls l2vpn
     vpls *
         description ~
         bridge-group *
-        vpn id *
-        ve id *
-        rd *
-        route-target export *
-        route-target import *
         autodiscovery bgp
+            vpn id *
+            ve id *
+            rd *
+            route-target export ~
+            route-target import ~
+        enable
 
 # ==== Catch-all: everything else is a simple add/remove toggle ============
 

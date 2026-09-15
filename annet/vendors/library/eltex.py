@@ -1,16 +1,16 @@
-from typing import Any, Iterable, Optional
+from typing import Any
 
 from annet.annlib.command import Command, CommandList
 from annet.annlib.netdev.views.hardware import HardwareView
 from annet.vendors.base import AbstractVendor
 from annet.vendors.registry import registry
-from annet.vendors.tabparser import BlockExitFormatter, FormatterContext, block_wrapper
+from annet.vendors.tabparser import BlockExitFormatter
 
 
 class EltexFormatter(BlockExitFormatter):
     """Formatter for Eltex ESR/MES running-config.
 
-    Eltex configuration is stored as a flat, Cisco-like tree:
+    Eltex configuration is stored as an indented, Cisco-like tree:
 
         hostname esr-1
         interface gigabitethernet 1/0/1
@@ -20,58 +20,24 @@ class EltexFormatter(BlockExitFormatter):
           router-id 10.0.0.1
           network 10.0.0.0 /24 area 0.0.0.0
 
-    Blocks are terminated with ``exit`` (like IOS).  Unlike Huawei (whose block
-    terminator ``quit`` never appears in a saved config) Eltex stores ``exit``
-    inline, so the splitter has to strip block-exit markers while computing the
-    indentation -- exactly as the IOS formatter does.
+    Every sub-mode is closed with a plain ``exit`` (there is no IOS-style
+    ``exit-address-family``), and the device always writes ``show
+    running-config`` fully indented.  The tree is therefore built directly from
+    the leading whitespace of the (non-``exit``) rows, which works both for the
+    device output and for the config rendered by the generators (which is
+    indented but contains no ``exit`` rows).
+
+    The generic ``exit`` is re-emitted by :meth:`BlockExitFormatter.block_exit`
+    when patching, so dropping ``exit`` rows from the parsed tree is safe.
     """
 
     block_exit_command = "exit"
 
-    def _split_indent(
-        self, line: str, indent: int, block_exit_strings: list[str]
-    ) -> tuple[list[str], int]:
-        # See CiscoFormatter._split_indent: an explicit exit string from a nested
-        # sub-mode (e.g. "exit-address-family") opens a new level and must be
-        # tracked separately from the generic "exit".
-        if line.strip() in block_exit_strings:
-            indent -= 1
-            block_exit_strings.remove(line.strip())
-            return block_exit_strings, indent
-
-        wrapped = list(self.block_exit(FormatterContext(current=(line.strip(), {}))))
-        if len(wrapped) != 3 or not isinstance(wrapped[1], str) or wrapped[1] == self.block_exit_command:
-            return block_exit_strings, indent
-
-        indent += 1
-        block_exit_strings.append(wrapped[1])
-        return block_exit_strings, indent
-
     def split(self, text: str) -> list[str]:
-        additional_indent = 0
-        block_exit_strings = [self.block_exit_command]
-
-        tree = self.split_remove_spaces(text)
-        result: list[str] = []
-        for item in tree:
-            stripped = item.strip()
-            is_block_exit = stripped in block_exit_strings
-            block_exit_strings, new_indent = self._split_indent(item, additional_indent, block_exit_strings)
-            # Drop the syntactic block-exit rows: they are re-emitted by the
-            # formatter when patching, exactly like on IOS.
-            if not is_block_exit:
-                result.append(f"{' ' * additional_indent}{item}")
-            additional_indent = new_indent
-
-        return result
-
-    def block_exit(self, context: Optional[FormatterContext]) -> Iterable[Any]:
-        current = context and context.row or ""
-
-        if current.startswith("address-family"):
-            yield from block_wrapper("exit-address-family")
-        else:
-            yield from super().block_exit(context)
+        # ``exit`` is a syntactic block terminator, not a configuration row, so
+        # it must not enter the tree.  Indentation of the remaining rows is
+        # preserved as-is; ``parse_to_tree`` derives the nesting from it.
+        return [line for line in self.split_remove_spaces(text) if line.strip() != self.block_exit_command]
 
 
 @registry.register

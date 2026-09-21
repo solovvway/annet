@@ -56,6 +56,7 @@ ip telnet server
 
 # ==== SNMP ===============================================================
 
+snmp-server server
 snmp-server community ~
 snmp-server host ~
 snmp-server view ~
@@ -67,6 +68,15 @@ snmp-server contact
 snmp-server trap-source
 snmp-server source-interface
 snmp-server engineid
+
+# MES switches wrap long community rows with an ``encrypted`` prefix and use
+# bare-SNMPv3 rows (snmp view/user/group/community/access).
+encrypted snmp-server community ~
+snmp view ~
+snmp user ~
+snmp group ~
+snmp community ~
+snmp access ~
 
 # ==== Logging / NTP / DNS =================================================
 

@@ -110,7 +110,8 @@ bridge *
 # interfaces carry L3 configuration, exactly as on IOS.  Each interface name is
 # captured into a group so every interface gets its own patch node.
 interface */((?:loopback|tunnel|vlan|bond|port-channel)\s+\d+)/
-    description ~
+    description ~          %logic=annet.rulebook.eltex.misc.description
+    name ~                 %logic=annet.rulebook.eltex.misc.name
     ip address ~                        %diff_logic=annet.rulebook.cisco.iface.diff
     ip address dhcp
     ipv6 address ~                      %diff_logic=annet.rulebook.cisco.iface.diff
@@ -131,10 +132,10 @@ interface */((?:loopback|tunnel|vlan|bond|port-channel)\s+\d+)/
         authentication *
         track *
         timers *
-        description ~
+        description ~          %logic=annet.rulebook.eltex.misc.description
 
 interface */([a-z]+ethernet\s+[0-9\/]+\.[0-9]+)/
-    description ~
+    description ~          %logic=annet.rulebook.eltex.misc.description
     ip address ~                        %diff_logic=annet.rulebook.cisco.iface.diff
     ip address dhcp
     ipv6 address ~                      %diff_logic=annet.rulebook.cisco.iface.diff
@@ -151,17 +152,17 @@ interface */([a-z]+ethernet\s+[0-9\/]+\.[0-9]+)/
 
 # Bridge and VPLS service interfaces (L2 service endpoints on ESR routers).
 interface */(bridge\s+\d+)/
-    description ~
+    description ~          %logic=annet.rulebook.eltex.misc.description
     bridge-group *
 
 interface */(vpls\s+\S+)/
-    description ~
+    description ~          %logic=annet.rulebook.eltex.misc.description
 
 # Physical Ethernet ports: last, so the L3 rules above match first.  The whole
 # interface name is captured into a group so every port gets its own patch node
 # (otherwise all ports collapse into one node and the diff cannot be emitted).
 interface */([a-z]+ethernet\s+[0-9\/\.]+)/  %logic=annet.rulebook.common.permanent %diff_logic=annet.rulebook.cisco.iface.diff
-    description ~
+    description ~          %logic=annet.rulebook.eltex.misc.description
     switchport mode
     switchport access vlan
     switchport trunk native vlan
@@ -192,7 +193,7 @@ ipv6 route vrf * ~
 # ==== VRF =================================================================
 
 ip vrf *
-    description ~
+    description ~          %logic=annet.rulebook.eltex.misc.description
     rd *
     route-target export *
     route-target import *
@@ -205,7 +206,7 @@ router ospf *
     area *
         area-type
         stub
-        description ~
+        description ~          %logic=annet.rulebook.eltex.misc.description
     network ~
     default-metric *
     passive-interface
@@ -232,7 +233,7 @@ router bgp *
         aggregate-address ~
     neighbor *
         remote-as
-        description ~
+        description ~          %logic=annet.rulebook.eltex.misc.description
         update-source
         ebgp-multihop *
         next-hop-self
@@ -257,11 +258,11 @@ router bgp *
 # key, otherwise "route-map RM permit 10" and "route-map RM deny 30" collapse
 # into one block and additions are lost.
 route-map * permit *
-    description ~
+    description ~          %logic=annet.rulebook.eltex.misc.description
     match ~
     set ~
 route-map * deny *
-    description ~
+    description ~          %logic=annet.rulebook.eltex.misc.description
     match ~
     set ~
 
@@ -282,7 +283,7 @@ mpls ldp
 
 mpls l2vpn
     vpls *
-        description ~
+        description ~          %logic=annet.rulebook.eltex.misc.description
         bridge-group *
         autodiscovery bgp
             vpn id *

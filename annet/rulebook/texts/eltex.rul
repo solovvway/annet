@@ -72,6 +72,7 @@ snmp-server engineid
 # MES switches wrap long community rows with an ``encrypted`` prefix and use
 # bare-SNMPv3 rows (snmp view/user/group/community/access).
 encrypted snmp-server community ~
+encrypted snmp-server host ~
 snmp view ~
 snmp user ~
 snmp group ~
